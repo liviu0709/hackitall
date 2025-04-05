@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import MainApp from './MainApp';
+import App1 from './App1';
 import QRScanner from './QRScanner';
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
 
     return (
         <div>
-            {!qrScanned ? <QRScanner onScanSuccess={handleQRSuccess} /> : <MainApp />}
+            {!qrScanned ? <QRScanner onScanSuccess={handleQRSuccess} /> : <App1 />}
         </div>
     );
 }
