@@ -45,13 +45,14 @@ export default function DriveThruMockApp() {
 
   const total = order.reduce((sum, item) => sum + item.price, 0).toFixed(2);
 
+  // Group items by id and count quantities
+  const itemCounts = {}; // Declare itemCounts at the top of the confirmation stage
+  order.forEach(item => {
+    itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
+  });
+
   // Generate the grouped order summary with product IDs and quantities
   const generateGroupedOrderSummary = () => {
-    const itemCounts = {}; // Define itemCounts to store quantity of each product
-    order.forEach(item => {
-      itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
-    });
-
     return Object.keys(itemCounts).map(id => {
       const item = mockMenu.find(item => item.id.toString() === id); // Find item name and price
       const quantity = itemCounts[id];
@@ -82,7 +83,7 @@ export default function DriveThruMockApp() {
               <CardContent className="p-4">
                 <p className="text-lg font-semibold">Order Summary:</p>
                 <ul className="mb-2">
-                  {/* Grouped Items */}
+                  {/* Display each item with quantity in the confirmation stage */}
                   {Object.keys(itemCounts).map(id => {
                     const item = mockMenu.find(item => item.id.toString() === id);
                     const quantity = itemCounts[id];
