@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent } from "./components/ui/Card";
 import { Button } from "./components/ui/Button";
 import { QRCodeSVG } from 'qrcode.react'; // Correct import for QR code generation
+import './App1.css';
 
 const mockMenu = [
   { id: 1, name: "Big Mac", price: 5.99 },
@@ -78,7 +79,7 @@ export default function DriveThruMockApp() {
             <div className="grid gap-2">
               <p className="text-lg font-semibold">Select your items:</p>
               {mockMenu.map((item) => (
-                  <Button key={item.id} onClick={() => addToOrder(item)}>
+                  <Button key={item.id} onClick={() => addToOrder(item)} className="mb-2">
                     {item.name} - ${item.price.toFixed(2)}
                   </Button>
               ))}
@@ -101,7 +102,7 @@ export default function DriveThruMockApp() {
                           <Button
                               variant="secondary"
                               onClick={() => removeFromOrder(item.id)}
-                              className="ml-4"
+                              className="ml-4 mb-2"
                           >
                             Remove
                           </Button>
@@ -112,7 +113,7 @@ export default function DriveThruMockApp() {
                 <p className="font-bold">Total: ${total}</p>
 
                 {/* Show QR Code Button in Confirmation Stage */}
-                <Button variant="secondary" onClick={() => setShowQRCode(!showQRCode)}>
+                <Button variant="secondary" onClick={() => setShowQRCode(!showQRCode)} className="mb-2">
                   {showQRCode ? 'Hide QR' : 'Show QR'}
                 </Button>
 
@@ -143,7 +144,7 @@ export default function DriveThruMockApp() {
 
         {/* Back Button */}
         {stage !== "ordering" && stage !== "complete" && (
-            <Button variant="secondary" onClick={prevStage}>
+            <Button variant="secondary" onClick={prevStage} className="mb-2">
               Back
             </Button>
         )}
@@ -154,6 +155,7 @@ export default function DriveThruMockApp() {
                 variant="secondary"
                 onClick={nextStage}
                 disabled={total === "0.00"}
+                className="mb-2"
             >
               {stage === "ordering"
                   ? "Next: Confirm Order"

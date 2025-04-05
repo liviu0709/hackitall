@@ -1,0 +1,143 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f4f4; /* Light background color */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    box-sizing: border-box;
+}
+
+/* Center content and make sure the width is responsive */
+.grid {
+    display: grid;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    max-width: 800px;
+    width: 100%;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+h1 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 1.5rem;
+}
+
+/* Buttons */
+button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    background-color: #007bff; /* Blue color */
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #0056b3; /* Darker blue when hovered */
+    transform: scale(1.05); /* Slight scale effect */
+}
+
+button:disabled {
+    background-color: #b0b0b0; /* Disabled button color */
+    cursor: not-allowed;
+}
+
+/* Card and Content */
+.card {
+    background-color: #f9f9f9;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* QR Code Section */
+.qr-code {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+/* Order Summary and Text */
+.text-lg {
+    font-size: 1.125rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.font-semibold {
+    font-weight: 600;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .grid {
+        padding: 1rem;
+    }
+
+    button {
+        width: 100%;
+    }
+}
+
+/* Adding a background color for the body */
+body {
+    background-color: #f9f9f9;
+}
+
+/* Text inside Buttons */
+button.secondary {
+    background-color: #6c757d; /* Gray background for secondary buttons */
+    color: #fff; /* White text */
+    border: 2px solid #5a6268; /* Darker gray border */
+    border-radius: 8px; /* Rounded corners */
+    padding: 0.75rem 1.5rem; /* Padding inside the button */
+    margin: 0.5rem; /* Margin around the button */
+    cursor: pointer; /* Pointer cursor on hover */
+    transition: background-color 0.3s ease, border 0.3s ease, transform 0.2s ease; /* Smooth transitions for hover effect */
+}
+
+/* Hover Effect for Secondary Button */
+button.secondary:hover {
+    background-color: #5a6268; /* Darker gray when hovered */
+    border-color: #4e555b; /* Darker border when hovered */
+    transform: scale(1.05); /* Slight scale effect */
+}
+
+button.secondary:hover {
+    background-color: #5a6268;
+}
+
+button.secondary:disabled {
+    background-color: #d6d8db;
+}
+
