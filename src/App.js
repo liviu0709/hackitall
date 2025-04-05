@@ -99,7 +99,7 @@ export default function DriveThruMockApp() {
         )}
 
         {/* Back Button */}
-        {stage !== "ordering" && stage != "complete" && (
+        {stage !== "ordering" && stage !== "complete" && (
             <Button variant="secondary" onClick={prevStage}>
               Back
             </Button>
