@@ -1,71 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { collection, getDocs } from "firebase/firestore";
+import { db } from './firebaseConfig';
 import { Card, CardContent } from "./components/ui/Card";
 import { Button } from "./components/ui/Button";
-import { QRCodeSVG } from 'qrcode.react'; // Correct import for QR code generation
+import { QRCodeSVG } from 'qrcode.react';
 import './App1.css';
 
-const mockMenu = [
-  { id: 1, name: "Big Mac", price: 5.99 },
-  { id: 2, name: "McChicken", price: 4.49 },
-  { id: 3, name: "Fries", price: 2.49 },
-  { id: 4, name: "Coke", price: 1.99 },
-];
-
-export default function DriveThruMockApp() {
+export default function DriveThruMockApp({ collectionName }) {
+  const [menu, setMenu] = useState([]);
   const [order, setOrder] = useState([]);
   const [stage, setStage] = useState("ordering");
-  const [showQRCode, setShowQRCode] = useState(false); // State to toggle QR visibility
+  const [showQRCode, setShowQRCode] = useState(false);
 
-  const addToOrder = (item) => {
-    setOrder([...order, item]);
-  };
+  useEffect(() => {
+    const fetchMenu = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, collectionName));
+        const items = querySnapshot.docs.map(doc => doc.data());
+        setMenu(items);
+      } catch (error) {
+        console.error("Eroare la încărcarea meniului:", error);
+      }
+    };
 
-  const removeFromOrder = (itemId) => {
-    setOrder(order.filter(item => item.id !== itemId));
-  };
-
-  const nextStage = () => {
-    if (stage === "ordering" && order.length > 0) {
-      setStage("confirmation");
-    } else if (stage === "confirmation") {
-      setStage("payment");
-    } else if (stage === "payment") {
-      setStage("complete");
+    if (collectionName) {
+      fetchMenu();
     }
-  };
+  }, [collectionName]);
 
-  const prevStage = () => {
-    if (stage === "confirmation") {
-      setStage("ordering");
-    } else if (stage === "payment") {
-      setStage("confirmation");
-    } else if (stage === "complete") {
-      setStage("payment");
-    }
-  };
 
+  const addToOrder = (item) => setOrder([...order, item]);
+  const removeFromOrder = (itemId) => setOrder(order.filter(item => item.id !== itemId));
   const total = order.reduce((sum, item) => sum + item.price, 0).toFixed(2);
 
-  // Group items by id and count quantities
-  const itemCounts = {}; // Declare itemCounts to store quantity of each product
+  const itemCounts = {};
   order.forEach(item => {
     itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
   });
 
-  // Generate the grouped order summary with item names, quantities, and total prices
   const generateOrderSummary = () => {
     return Object.keys(itemCounts).map(id => {
-      const item = mockMenu.find(item => item.id.toString() === id); // Find item name and price
+      const item = menu.find(item => item.id.toString() === id);
       const quantity = itemCounts[id];
       return `${item.name} x${quantity} - $${(item.price * quantity).toFixed(2)}`;
     }).join(', ');
   };
 
-  // Generate the QR code value (id:quantity format)
   const generateQRCodeData = () => {
     return Object.keys(itemCounts)
-        .map(id => `${id}:${itemCounts[id]}`) // Format as id:quantity
+        .map(id => `${id}:${itemCounts[id]}`)
         .join(',');
+  };
+
+  const nextStage = () => {
+    if (stage === "ordering" && order.length > 0) setStage("confirmation");
+    else if (stage === "confirmation") setStage("payment");
+    else if (stage === "payment") setStage("complete");
+  };
+
+  const prevStage = () => {
+    if (stage === "confirmation") setStage("ordering");
+    else if (stage === "payment") setStage("confirmation");
+    else if (stage === "complete") setStage("payment");
   };
 
   const orderSummary = generateOrderSummary();
@@ -78,7 +74,7 @@ export default function DriveThruMockApp() {
         {stage === "ordering" && (
             <div className="grid gap-2">
               <p className="text-lg font-semibold">Select your items:</p>
-              {mockMenu.map((item) => (
+              {menu.map((item) => (
                   <Button key={item.id} onClick={() => addToOrder(item)} className="mb-2">
                     {item.name} - ${item.price.toFixed(2)}
                   </Button>
@@ -92,18 +88,13 @@ export default function DriveThruMockApp() {
               <CardContent className="p-4">
                 <p className="text-lg font-semibold">Order Summary:</p>
                 <ul className="mb-2">
-                  {/* Display each item with quantity and total price in the confirmation stage */}
                   {Object.keys(itemCounts).map(id => {
-                    const item = mockMenu.find(item => item.id.toString() === id);
+                    const item = menu.find(item => item.id.toString() === id);
                     const quantity = itemCounts[id];
                     return (
                         <li key={id}>
                           {item.name} x{quantity} - ${ (item.price * quantity).toFixed(2) }
-                          <Button
-                              variant="secondary"
-                              onClick={() => removeFromOrder(item.id)}
-                              className="ml-4 mb-2"
-                          >
+                          <Button variant="secondary" onClick={() => removeFromOrder(item.id)} className="ml-4 mb-2">
                             Remove
                           </Button>
                         </li>
@@ -111,13 +102,10 @@ export default function DriveThruMockApp() {
                   })}
                 </ul>
                 <p className="font-bold">Total: ${total}</p>
-
-                {/* Show QR Code Button in Confirmation Stage */}
                 <Button variant="secondary" onClick={() => setShowQRCode(!showQRCode)} className="mb-2">
                   {showQRCode ? 'Hide QR' : 'Show QR'}
                 </Button>
 
-                {/* Show QR Code if showQRCode is true */}
                 {showQRCode && (
                     <div className="mt-4 text-center">
                       <QRCodeSVG value={qrCodeData} size={256} />
@@ -142,14 +130,10 @@ export default function DriveThruMockApp() {
             </div>
         )}
 
-        {/* Back Button */}
         {stage !== "ordering" && stage !== "complete" && (
-            <Button variant="secondary" onClick={prevStage} className="mb-2">
-              Back
-            </Button>
+            <Button variant="secondary" onClick={prevStage} className="mb-2">Back</Button>
         )}
 
-        {/* Next Button */}
         {stage !== "complete" && (
             <Button
                 variant="secondary"
@@ -157,11 +141,8 @@ export default function DriveThruMockApp() {
                 disabled={total === "0.00"}
                 className="mb-2"
             >
-              {stage === "ordering"
-                  ? "Next: Confirm Order"
-                  : stage === "confirmation"
-                      ? "Next: Pay"
-                      : "Finish Order"}
+              {stage === "ordering" ? "Next: Confirm Order"
+                  : stage === "confirmation" ? "Next: Pay" : "Finish Order"}
             </Button>
         )}
       </div>

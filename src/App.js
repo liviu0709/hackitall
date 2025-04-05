@@ -1,19 +1,23 @@
+// App.js
 import React, { useState } from 'react';
-import MainApp from './MainApp';
 import App1 from './App1';
 import QRScanner from './QRScanner';
 
 function App() {
-    const [qrScanned, setQrScanned] = useState(false);
+    const [collectionName, setCollectionName] = useState(null);
 
     const handleQRSuccess = (data) => {
         console.log("Cod QR detectat:", data);
-        setQrScanned(true);
+        setCollectionName(data); // exemplu: "menu", "menu2"
     };
 
     return (
         <div>
-            {!qrScanned ? <QRScanner onScanSuccess={handleQRSuccess} /> : <App1 />}
+            {!collectionName ? (
+                <QRScanner onScanSuccess={handleQRSuccess} />
+            ) : (
+                <App1 collectionName={collectionName} />
+            )}
         </div>
     );
 }
