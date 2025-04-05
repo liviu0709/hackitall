@@ -46,13 +46,13 @@ export default function DriveThruMockApp() {
   const total = order.reduce((sum, item) => sum + item.price, 0).toFixed(2);
 
   // Group items by id and count quantities
-  const itemCounts = {}; // Declare itemCounts at the top of the confirmation stage
+  const itemCounts = {}; // Declare itemCounts to store quantity of each product
   order.forEach(item => {
     itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
   });
 
-  // Generate the grouped order summary with product IDs and quantities
-  const generateGroupedOrderSummary = () => {
+  // Generate the grouped order summary with item names, quantities, and total prices
+  const generateOrderSummary = () => {
     return Object.keys(itemCounts).map(id => {
       const item = mockMenu.find(item => item.id.toString() === id); // Find item name and price
       const quantity = itemCounts[id];
@@ -60,7 +60,15 @@ export default function DriveThruMockApp() {
     }).join(', ');
   };
 
-  const orderSummary = generateGroupedOrderSummary();
+  // Generate the QR code value (id:quantity format)
+  const generateQRCodeData = () => {
+    return Object.keys(itemCounts)
+        .map(id => `${id}:${itemCounts[id]}`) // Format as id:quantity
+        .join(',');
+  };
+
+  const orderSummary = generateOrderSummary();
+  const qrCodeData = generateQRCodeData();
 
   return (
       <div className="grid gap-4 p-6 max-w-xl mx-auto">
@@ -83,7 +91,7 @@ export default function DriveThruMockApp() {
               <CardContent className="p-4">
                 <p className="text-lg font-semibold">Order Summary:</p>
                 <ul className="mb-2">
-                  {/* Display each item with quantity in the confirmation stage */}
+                  {/* Display each item with quantity and total price in the confirmation stage */}
                   {Object.keys(itemCounts).map(id => {
                     const item = mockMenu.find(item => item.id.toString() === id);
                     const quantity = itemCounts[id];
@@ -111,7 +119,7 @@ export default function DriveThruMockApp() {
                 {/* Show QR Code if showQRCode is true */}
                 {showQRCode && (
                     <div className="mt-4 text-center">
-                      <QRCodeSVG value={orderSummary} size={256} />
+                      <QRCodeSVG value={qrCodeData} size={256} />
                       <p className="mt-2">Scan this QR code to confirm your order at the drive-thru!</p>
                     </div>
                 )}
