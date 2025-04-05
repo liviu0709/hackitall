@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from "./components/ui/Card";
 import { Button } from "./components/ui/Button";
+import { QRCodeSVG } from 'qrcode.react'; // Correct import for QR code generation
 
 const mockMenu = [
   { id: 1, name: "Big Mac", price: 5.99 },
@@ -12,6 +13,7 @@ const mockMenu = [
 export default function DriveThruMockApp() {
   const [order, setOrder] = useState([]);
   const [stage, setStage] = useState("ordering");
+  const [showQRCode, setShowQRCode] = useState(false); // State to toggle QR visibility
 
   const addToOrder = (item) => {
     setOrder([...order, item]);
@@ -43,6 +45,22 @@ export default function DriveThruMockApp() {
 
   const total = order.reduce((sum, item) => sum + item.price, 0).toFixed(2);
 
+  // Generate the grouped order summary with product IDs and quantities
+  const generateGroupedOrderSummary = () => {
+    const itemCounts = {}; // Define itemCounts to store quantity of each product
+    order.forEach(item => {
+      itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
+    });
+
+    return Object.keys(itemCounts).map(id => {
+      const item = mockMenu.find(item => item.id.toString() === id); // Find item name and price
+      const quantity = itemCounts[id];
+      return `${item.name} x${quantity} - $${(item.price * quantity).toFixed(2)}`;
+    }).join(', ');
+  };
+
+  const orderSummary = generateGroupedOrderSummary();
+
   return (
       <div className="grid gap-4 p-6 max-w-xl mx-auto">
         <h1 className="text-2xl font-bold text-center">🚗 Drive-Thru Ordering System</h1>
@@ -55,8 +73,6 @@ export default function DriveThruMockApp() {
                     {item.name} - ${item.price.toFixed(2)}
                   </Button>
               ))}
-
-              {/* Show the current total while ordering */}
               <p className="mt-4 font-semibold">Current Total: ${total}</p>
             </div>
         )}
@@ -66,20 +82,38 @@ export default function DriveThruMockApp() {
               <CardContent className="p-4">
                 <p className="text-lg font-semibold">Order Summary:</p>
                 <ul className="mb-2">
-                  {order.map((item, index) => (
-                      <li key={index}>
-                        {item.name} - ${item.price.toFixed(2)}
-                        <Button
-                            variant="secondary"
-                            onClick={() => removeFromOrder(item.id)}
-                            className="ml-4"
-                        >
-                          Remove
-                        </Button>
-                      </li>
-                  ))}
+                  {/* Grouped Items */}
+                  {Object.keys(itemCounts).map(id => {
+                    const item = mockMenu.find(item => item.id.toString() === id);
+                    const quantity = itemCounts[id];
+                    return (
+                        <li key={id}>
+                          {item.name} x{quantity} - ${ (item.price * quantity).toFixed(2) }
+                          <Button
+                              variant="secondary"
+                              onClick={() => removeFromOrder(item.id)}
+                              className="ml-4"
+                          >
+                            Remove
+                          </Button>
+                        </li>
+                    );
+                  })}
                 </ul>
                 <p className="font-bold">Total: ${total}</p>
+
+                {/* Show QR Code Button in Confirmation Stage */}
+                <Button variant="secondary" onClick={() => setShowQRCode(!showQRCode)}>
+                  {showQRCode ? 'Hide QR' : 'Show QR'}
+                </Button>
+
+                {/* Show QR Code if showQRCode is true */}
+                {showQRCode && (
+                    <div className="mt-4 text-center">
+                      <QRCodeSVG value={orderSummary} size={256} />
+                      <p className="mt-2">Scan this QR code to confirm your order at the drive-thru!</p>
+                    </div>
+                )}
               </CardContent>
             </Card>
         )}
@@ -110,7 +144,7 @@ export default function DriveThruMockApp() {
             <Button
                 variant="secondary"
                 onClick={nextStage}
-                disabled={total === "0.00"} // Disable if total is $0
+                disabled={total === "0.00"}
             >
               {stage === "ordering"
                   ? "Next: Confirm Order"
