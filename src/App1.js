@@ -6,7 +6,7 @@ import { Button } from "./components/ui/Button";
 import { QRCodeSVG } from 'qrcode.react';
 import './App1.css';
 
-export default function DriveThruMockApp({ collectionName }) {
+export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
   const [menu, setMenu] = useState([]);
   const [order, setOrder] = useState([]);
   const [stage, setStage] = useState("ordering");
@@ -28,23 +28,14 @@ export default function DriveThruMockApp({ collectionName }) {
     }
   }, [collectionName]);
 
-
   const addToOrder = (item) => setOrder([...order, item]);
   const removeFromOrder = (itemId) => setOrder(order.filter(item => item.id !== itemId));
-  const total = order.reduce((sum, item) => sum + item.price, 0).toFixed(2);
+  const total = order.reduce((sum, item) => sum + Number(item.price), 0).toFixed(2);
 
   const itemCounts = {};
   order.forEach(item => {
     itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
   });
-
-  const generateOrderSummary = () => {
-    return Object.keys(itemCounts).map(id => {
-      const item = menu.find(item => item.id.toString() === id);
-      const quantity = itemCounts[id];
-      return `${item.name} x${quantity} - $${(item.price * quantity).toFixed(2)}`;
-    }).join(', ');
-  };
 
   const generateQRCodeData = () => {
     return Object.keys(itemCounts)
@@ -54,7 +45,7 @@ export default function DriveThruMockApp({ collectionName }) {
 
   const nextStage = () => {
     if (stage === "ordering" && order.length > 0) setStage("confirmation");
-    else if (stage === "confirmation") setStage("payment");
+    else if (stage === "confirmation") onLaunchMainApp(); // launch MainApp
     else if (stage === "payment") setStage("complete");
   };
 
@@ -63,9 +54,6 @@ export default function DriveThruMockApp({ collectionName }) {
     else if (stage === "payment") setStage("confirmation");
     else if (stage === "complete") setStage("payment");
   };
-
-  const orderSummary = generateOrderSummary();
-  const qrCodeData = generateQRCodeData();
 
   return (
       <div className="grid gap-4 p-6 max-w-xl mx-auto">
@@ -76,7 +64,7 @@ export default function DriveThruMockApp({ collectionName }) {
               <p className="text-lg font-semibold">Select your items:</p>
               {menu.map((item) => (
                   <Button key={item.id} onClick={() => addToOrder(item)} className="mb-2">
-                    {item.name} - ${item.price.toFixed(2)}
+                    {item.name} - ${Number(item.price).toFixed(2)}
                   </Button>
               ))}
               <p className="mt-4 font-semibold">Current Total: ${total}</p>
@@ -93,8 +81,12 @@ export default function DriveThruMockApp({ collectionName }) {
                     const quantity = itemCounts[id];
                     return (
                         <li key={id}>
-                          {item.name} x{quantity} - ${ (item.price * quantity).toFixed(2) }
-                          <Button variant="secondary" onClick={() => removeFromOrder(item.id)} className="ml-4 mb-2">
+                          {item.name} x{quantity} - ${(item.price * quantity).toFixed(2)}
+                          <Button
+                              variant="secondary"
+                              onClick={() => removeFromOrder(item.id)}
+                              className="ml-4 mb-2"
+                          >
                             Remove
                           </Button>
                         </li>
@@ -108,7 +100,7 @@ export default function DriveThruMockApp({ collectionName }) {
 
                 {showQRCode && (
                     <div className="mt-4 text-center">
-                      <QRCodeSVG value={qrCodeData} size={256} />
+                      <QRCodeSVG value={generateQRCodeData()} size={256} />
                       <p className="mt-2">Scan this QR code to confirm your order at the drive-thru!</p>
                     </div>
                 )}
@@ -141,8 +133,11 @@ export default function DriveThruMockApp({ collectionName }) {
                 disabled={total === "0.00"}
                 className="mb-2"
             >
-              {stage === "ordering" ? "Next: Confirm Order"
-                  : stage === "confirmation" ? "Next: Pay" : "Finish Order"}
+              {stage === "ordering"
+                  ? "Next: Confirm Order"
+                  : stage === "confirmation"
+                      ? "Next: Order Confirmation"
+                      : "Finish Order"}
             </Button>
         )}
       </div>
