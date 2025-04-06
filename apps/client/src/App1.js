@@ -11,10 +11,8 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
   const [order, setOrder] = useState([]);
   const [stage, setStage] = useState("ordering");
   const [showQRCode, setShowQRCode] = useState(false);
-
-  // State pentru cantitatea selectată
-  const [selectedQuantity, setSelectedQuantity] = useState(null);
-  const [selectedItem, setSelectedItem] = useState(null); // Articolul pentru care alegi cantitatea
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -23,7 +21,7 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
         const items = querySnapshot.docs.map(doc => doc.data());
         setMenu(items);
       } catch (error) {
-        console.error("Eroare la încărcarea meniului:", error);
+        console.error("Error loading menu:", error);
       }
     };
 
@@ -33,19 +31,18 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
   }, [collectionName]);
 
   const addToOrder = (item, quantity) => {
-    // Adăugăm articolul în coș cu cantitatea selectată
     const newOrder = [...order];
     const existingItem = newOrder.find(orderItem => orderItem.id === item.id);
 
     if (existingItem) {
-      existingItem.quantity += quantity; // Dacă articolul există deja, actualizăm cantitatea
+      existingItem.quantity += quantity;
     } else {
-      newOrder.push({ ...item, quantity }); // Dacă articolul nu există, adăugăm cu cantitatea selectată
+      newOrder.push({ ...item, quantity });
     }
 
     setOrder(newOrder);
-    setSelectedItem(null); // Resetăm articolul selectat
-    setSelectedQuantity(null); // Resetăm cantitatea
+    setSelectedItem(null);
+    setSelectedQuantity(1);
   };
 
   const removeFromOrder = (itemId) => {
@@ -67,7 +64,7 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
 
   const nextStage = () => {
     if (stage === "ordering" && order.length > 0) setStage("confirmation");
-    else if (stage === "confirmation") onLaunchMainApp(); // launch MainApp
+    else if (stage === "confirmation") onLaunchMainApp();
     else if (stage === "payment") setStage("complete");
   };
 
@@ -86,19 +83,24 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
               <p className="text-lg font-semibold">Select your items:</p>
               {menu.map((item) => (
                   <div key={item.id}>
-                    <Button onClick={() => { setSelectedItem(item); setSelectedQuantity(1); }} className="mb-2">
-                      {item.name} - ${Number(item.price).toFixed(2)}
-                    </Button>
+                    <Card>
+                      <CardContent>
+                        <h3 className="item-name">{item.name}</h3>
+                        <p className="item-price">${Number(item.price).toFixed(2)}</p>
+                        <Button onClick={() => { setSelectedItem(item); setSelectedQuantity(1); }} className="mb-2">
+                          Select Quantity
+                        </Button>
 
-                    {/* Meniu de selectare a cantității */}
-                    {selectedItem === item && (
-                        <div className="flex items-center gap-2">
-                          <Button onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}>-</Button>
-                          <span>{selectedQuantity}</span>
-                          <Button onClick={() => setSelectedQuantity(selectedQuantity + 1)}>+</Button>
-                          <Button onClick={() => addToOrder(item, selectedQuantity)} className="ml-2">Add to order</Button>
-                        </div>
-                    )}
+                        {selectedItem === item && (
+                            <div className="flex items-center gap-2">
+                              <Button onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}>-</Button>
+                              <span>{selectedQuantity}</span>
+                              <Button onClick={() => setSelectedQuantity(selectedQuantity + 1)}>+</Button>
+                              <Button onClick={() => addToOrder(item, selectedQuantity)} className="ml-2">Add to Order</Button>
+                            </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   </div>
               ))}
               <p className="mt-4 font-semibold">Current Total: ${total}</p>
@@ -128,6 +130,7 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
                   })}
                 </ul>
                 <p className="font-bold">Total: ${total}</p>
+
                 <Button variant="secondary" onClick={() => setShowQRCode(!showQRCode)} className="mb-2">
                   {showQRCode ? 'Hide QR' : 'Show QR'}
                 </Button>
@@ -164,13 +167,13 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
             <Button
                 variant="secondary"
                 onClick={nextStage}
-                disabled={total === "0.00"}
+                disabled={order.length === 0}
                 className="mb-2"
             >
               {stage === "ordering"
                   ? "Next: Confirm Order"
                   : stage === "confirmation"
-                      ? "Next: Order Confirmation"
+                      ? "Next: Pay"
                       : "Finish Order"}
             </Button>
         )}
