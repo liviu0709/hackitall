@@ -11,8 +11,6 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
   const [order, setOrder] = useState([]);
   const [stage, setStage] = useState("ordering");
   const [showQRCode, setShowQRCode] = useState(false);
-  const [selectedItem, setSelectedItem] = useState(null);
-  const [selectedQuantity, setSelectedQuantity] = useState(1);
 
   useEffect(() => {
     const fetchMenu = async () => {
@@ -21,7 +19,7 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
         const items = querySnapshot.docs.map(doc => doc.data());
         setMenu(items);
       } catch (error) {
-        console.error("Error loading menu:", error);
+        console.error("Eroare la încărcarea meniului:", error);
       }
     };
 
@@ -30,30 +28,13 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
     }
   }, [collectionName]);
 
-  const addToOrder = (item, quantity) => {
-    const newOrder = [...order];
-    const existingItem = newOrder.find(orderItem => orderItem.id === item.id);
-
-    if (existingItem) {
-      existingItem.quantity += quantity;
-    } else {
-      newOrder.push({ ...item, quantity });
-    }
-
-    setOrder(newOrder);
-    setSelectedItem(null);
-    setSelectedQuantity(1);
-  };
-
-  const removeFromOrder = (itemId) => {
-    setOrder(order.filter(item => item.id !== itemId));
-  };
-
-  const total = order.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0).toFixed(2);
+  const addToOrder = (item) => setOrder([...order, item]);
+  const removeFromOrder = (itemId) => setOrder(order.filter(item => item.id !== itemId));
+  const total = order.reduce((sum, item) => sum + Number(item.price), 0).toFixed(2);
 
   const itemCounts = {};
   order.forEach(item => {
-    itemCounts[item.id] = (itemCounts[item.id] || 0) + item.quantity;
+    itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
   });
 
   const generateQRCodeData = () => {
@@ -75,107 +56,80 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
   };
 
   return (
-      <div className="grid gap-4 p-6 max-w-xl mx-auto">
-        <h1 className="text-2xl font-bold text-center">🚗 Drive-Thru Ordering System</h1>
+      <div className="grid">
+        <h1>🚗 Drive-Thru Ordering System</h1>
 
         {stage === "ordering" && (
-            <div className="grid gap-2">
+            <div className="menu-section">
               <p className="text-lg font-semibold">Select your items:</p>
-              {menu.map((item) => (
-                  <div key={item.id}>
-                    <Card>
+              <div className="menu-grid">
+                {menu.map((item) => (
+                    <Card key={item.id}>
                       <CardContent>
                         <h3 className="item-name">{item.name}</h3>
                         <p className="item-price">${Number(item.price).toFixed(2)}</p>
-                        <Button onClick={() => { setSelectedItem(item); setSelectedQuantity(1); }} className="mb-2">
-                          Select Quantity
+                        <Button onClick={() => addToOrder(item)}>
+                          Add to Order
                         </Button>
-
-                        {selectedItem === item && (
-                            <div className="flex items-center gap-2">
-                              <Button onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}>-</Button>
-                              <span>{selectedQuantity}</span>
-                              <Button onClick={() => setSelectedQuantity(selectedQuantity + 1)}>+</Button>
-                              <Button onClick={() => addToOrder(item, selectedQuantity)} className="ml-2">Add to Order</Button>
-                            </div>
-                        )}
                       </CardContent>
                     </Card>
-                  </div>
-              ))}
-              <p className="mt-4 font-semibold">Current Total: ${total}</p>
+                ))}
+              </div>
+              <div className="total-price">
+                Current Total: ${total}
+              </div>
+              <Button onClick={nextStage} disabled={order.length === 0}>
+                Review Order
+              </Button>
             </div>
         )}
 
         {stage === "confirmation" && (
             <Card>
-              <CardContent className="p-4">
+              <CardContent>
                 <p className="text-lg font-semibold">Order Summary:</p>
-                <ul className="mb-2">
+                <div className="order-summary">
                   {Object.keys(itemCounts).map(id => {
                     const item = menu.find(item => item.id.toString() === id);
                     const quantity = itemCounts[id];
                     return (
-                        <li key={id}>
-                          {item.name} x{quantity} - ${(item.price * quantity).toFixed(2)}
-                          <Button
-                              variant="secondary"
+                        <div key={id} className="order-item">
+                          <div className="item-details">
+                            <span className="item-name">{item.name}</span>
+                            <span className="item-quantity">x{quantity}</span>
+                            <span className="item-subtotal">${(item.price * quantity).toFixed(2)}</span>
+                          </div>
+                          <button
+                              className="remove-button"
                               onClick={() => removeFromOrder(item.id)}
-                              className="ml-4 mb-2"
                           >
                             Remove
-                          </Button>
-                        </li>
+                          </button>
+                        </div>
                     );
                   })}
-                </ul>
-                <p className="font-bold">Total: ${total}</p>
-
-                <Button variant="secondary" onClick={() => setShowQRCode(!showQRCode)} className="mb-2">
-                  {showQRCode ? 'Hide QR' : 'Show QR'}
-                </Button>
-
-                {showQRCode && (
-                    <div className="mt-4 text-center">
-                      <QRCodeSVG value={generateQRCodeData()} size={256} />
-                      <p className="mt-2">Scan this QR code to confirm your order at the drive-thru!</p>
-                    </div>
-                )}
+                </div>
+                <div className="total-price">
+                  Total: ${total}
+                </div>
+                <div className="button-group">
+                  <Button variant="secondary" onClick={() => setShowQRCode(!showQRCode)}>
+                    {showQRCode ? 'Hide QR' : 'Show QR'}
+                  </Button>
+                  {showQRCode && (
+                      <div className="qr-code">
+                        <QRCodeSVG value={generateQRCodeData()} size={200} />
+                      </div>
+                  )}
+                  <Button onClick={prevStage}>
+                    Back to Menu
+                  </Button>
+                  <Button onClick={nextStage}>
+                    Proceed to Payment
+                  </Button>
+                </div>
               </CardContent>
             </Card>
-        )}
-
-        {stage === "payment" && (
-            <div>
-              <p className="text-lg font-semibold">Please proceed to payment...</p>
-              <p className="text-sm text-gray-500">(Mocking payment gateway)</p>
-            </div>
-        )}
-
-        {stage === "complete" && (
-            <div>
-              <p className="text-green-600 text-lg font-bold">✅ Order Complete!</p>
-              <p>Thank you for your order. Please drive to the next window. 🚗💨</p>
-            </div>
-        )}
-
-        {stage !== "ordering" && stage !== "complete" && (
-            <Button variant="secondary" onClick={prevStage} className="mb-2">Back</Button>
-        )}
-
-        {stage !== "complete" && (
-            <Button
-                variant="secondary"
-                onClick={nextStage}
-                disabled={order.length === 0}
-                className="mb-2"
-            >
-              {stage === "ordering"
-                  ? "Next: Confirm Order"
-                  : stage === "confirmation"
-                      ? "Next: Pay"
-                      : "Finish Order"}
-            </Button>
         )}
       </div>
   );
