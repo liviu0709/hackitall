@@ -2,6 +2,9 @@
   "name": "ideea",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "apps/*"
+  ],
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.2",
     "@testing-library/dom": "^10.4.0",
