@@ -12,6 +12,10 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
   const [stage, setStage] = useState("ordering");
   const [showQRCode, setShowQRCode] = useState(false);
 
+  // State pentru cantitatea selectată
+  const [selectedQuantity, setSelectedQuantity] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null); // Articolul pentru care alegi cantitatea
+
   useEffect(() => {
     const fetchMenu = async () => {
       try {
@@ -28,13 +32,31 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
     }
   }, [collectionName]);
 
-  const addToOrder = (item) => setOrder([...order, item]);
-  const removeFromOrder = (itemId) => setOrder(order.filter(item => item.id !== itemId));
-  const total = order.reduce((sum, item) => sum + Number(item.price), 0).toFixed(2);
+  const addToOrder = (item, quantity) => {
+    // Adăugăm articolul în coș cu cantitatea selectată
+    const newOrder = [...order];
+    const existingItem = newOrder.find(orderItem => orderItem.id === item.id);
+
+    if (existingItem) {
+      existingItem.quantity += quantity; // Dacă articolul există deja, actualizăm cantitatea
+    } else {
+      newOrder.push({ ...item, quantity }); // Dacă articolul nu există, adăugăm cu cantitatea selectată
+    }
+
+    setOrder(newOrder);
+    setSelectedItem(null); // Resetăm articolul selectat
+    setSelectedQuantity(null); // Resetăm cantitatea
+  };
+
+  const removeFromOrder = (itemId) => {
+    setOrder(order.filter(item => item.id !== itemId));
+  };
+
+  const total = order.reduce((sum, item) => sum + Number(item.price) * item.quantity, 0).toFixed(2);
 
   const itemCounts = {};
   order.forEach(item => {
-    itemCounts[item.id] = (itemCounts[item.id] || 0) + 1;
+    itemCounts[item.id] = (itemCounts[item.id] || 0) + item.quantity;
   });
 
   const generateQRCodeData = () => {
@@ -63,9 +85,21 @@ export default function DriveThruMockApp({ collectionName, onLaunchMainApp }) {
             <div className="grid gap-2">
               <p className="text-lg font-semibold">Select your items:</p>
               {menu.map((item) => (
-                  <Button key={item.id} onClick={() => addToOrder(item)} className="mb-2">
-                    {item.name} - ${Number(item.price).toFixed(2)}
-                  </Button>
+                  <div key={item.id}>
+                    <Button onClick={() => { setSelectedItem(item); setSelectedQuantity(1); }} className="mb-2">
+                      {item.name} - ${Number(item.price).toFixed(2)}
+                    </Button>
+
+                    {/* Meniu de selectare a cantității */}
+                    {selectedItem === item && (
+                        <div className="flex items-center gap-2">
+                          <Button onClick={() => setSelectedQuantity(Math.max(1, selectedQuantity - 1))}>-</Button>
+                          <span>{selectedQuantity}</span>
+                          <Button onClick={() => setSelectedQuantity(selectedQuantity + 1)}>+</Button>
+                          <Button onClick={() => addToOrder(item, selectedQuantity)} className="ml-2">Add to order</Button>
+                        </div>
+                    )}
+                  </div>
               ))}
               <p className="mt-4 font-semibold">Current Total: ${total}</p>
             </div>
