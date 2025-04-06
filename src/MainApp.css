@@ -1,38 +1,265 @@
 .MainApp {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8eb 100%);
+    padding: 20px;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Confirmation Message */
+.confirmation-message {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: linear-gradient(to right, #e8f5e9, #c8e6c9);
+    border: 1px solid #81c784;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #2e7d32;
     text-align: center;
+    opacity: 1;
+    transition: opacity 1s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
-.App-logo {
-    height: 40vmin;
-    pointer-events: none;
+.confirmation-message.fade-out {
+    opacity: 0;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-    .App-logo {
-        animation: App-logo-spin infinite 20s linear;
-    }
+/* Chat Container */
+.chat-container {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    margin-top: 20px;
 }
 
-.App-header {
-    background-color: #282c34;
-    min-height: 100vh;
+/* Operator and Client Sections */
+.operator-section,
+.client-section {
+    flex: 1;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.operator-section:hover,
+.client-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+/* Section Headers */
+.section-header {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e0e0e0;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Control Buttons */
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.control-button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: linear-gradient(to right, #4a90e2, #357abd);
+    color: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.control-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.control-button:active {
+    transform: translateY(0);
+}
+
+.control-button.active {
+    background: linear-gradient(to right, #f39c12, #e67e22);
+    animation: pulse 1.5s infinite;
+}
+
+.control-button.stop {
+    background: linear-gradient(to right, #e74c3c, #c0392b);
+}
+
+.control-button.speech {
+    background: linear-gradient(to right, #9b59b6, #8e44ad);
+    width: 100%;
+}
+
+/* Text Display */
+.text-display {
+    min-height: 60px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.word {
+    margin-right: 5px;
+    transition: color 0.3s ease, font-weight 0.3s ease;
+}
+
+.word.highlighted {
+    color: #2ecc71;
+    font-weight: bold;
+}
+
+/* Text Areas */
+.text-area {
+    flex: 1;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    font-size: 16px;
+    line-height: 1.5;
+    resize: none;
+    background-color: #f8f9fa;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 15px;
+}
+
+.text-area:focus {
+    outline: none;
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.25);
+}
+
+/* Confirm Button */
+.confirm-button {
+    padding: 12px 20px;
+    background: linear-gradient(to right, #2ecc71, #27ae60);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin-top: 10px;
+}
+
+.confirm-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    background: linear-gradient(to right, #27ae60, #219653);
+}
+
+.confirm-button:active {
+    transform: translateY(-1px);
+}
+
+/* Sign Language Section */
+.sign-language-section {
+    margin-top: 20px;
+    padding: 20px;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.sign-language-section:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sign-language-section h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* Webcam Container */
+.webcam-container {
+    display: flex;
+    justify-content: center;
+    margin: 15px 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Sign Recognition Display */
+.sign-display {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    font-size: calc(10px + 2vmin);
-    color: white;
+    gap: 10px;
+    margin-top: 15px;
 }
 
-.App-link {
-    color: #61dafb;
+.sign-display p {
+    margin: 0;
+    font-size: 16px;
 }
 
-@keyframes App-logo-spin {
-    from {
-        transform: rotate(0deg);
+.sign-display .sign {
+    color: #2ecc71;
+    font-weight: 600;
+}
+
+.sign-display .word {
+    font-weight: 600;
+    color: #333;
+}
+
+/* Animation */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(243, 156, 18, 0.4);
     }
-    to {
-        transform: rotate(360deg);
+    70% {
+        box-shadow: 0 0 0 10px rgba(243, 156, 18, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(243, 156, 18, 0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+    }
+
+    .operator-section,
+    .client-section {
+        margin-bottom: 20px;
+    }
+
+    .section-header {
+        font-size: 1.25rem;
     }
 }
